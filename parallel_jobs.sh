@@ -1,6 +1,11 @@
-.
 #!/bin/bash
 # set -o monitor
+
+# I don't know how people feel about xargs or parallel but I didn't know they
+# existed at one point, plus there are a couple versions of parallel on Ubuntu
+# and I feel like xargs arguments can be confusing. Also, this is pure bash so#
+# no need for other tool installations.
+
 
 #Arguments
 SEQMIN=11
