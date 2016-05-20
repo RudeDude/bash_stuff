@@ -8,3 +8,5 @@ My collection of bash scripts and tricks
 * README.md -- Self references AaAAAaaaAAA!
 * shellMost.sh -- Check up on your most common bash activity.
 * blame -- Runs top for a couple seconds and tells you the user with most CPU
+* git-prompt.sh -- Can be used in your bash prompt for git status.
+  * git-prompt-chars.htm -- Helper HTML to show / create the unicode characters
