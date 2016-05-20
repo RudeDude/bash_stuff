@@ -7,4 +7,4 @@ My collection of bash scripts and tricks
 * randenc.sh -- Use GPG to turn a stream of data into a stream of noise.
 * README.md -- Self references AaAAAaaaAAA!
 * shellMost.sh -- Check up on your most common bash activity.
-
+* blame -- Runs top for a couple seconds and tells you the user with most CPU

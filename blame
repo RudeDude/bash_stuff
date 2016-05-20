@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# Runs top for N seconds (defaults to 2) and tells you the username of the top CPU process.
+
+if [ "$1" == "" ]
+then
+  DELAY=2
+else
+  DELAY=$1
+fi
+
+
+top -b -d$DELAY -n2 |grep -A 1 USER |tail -1 |awk '{ print $2 }'
+
