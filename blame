@@ -2,6 +2,18 @@
 
 # Runs top for N seconds (defaults to 2) and tells you the username of the top CPU process.
 
+echo process count:
+ps axu | cut -d ' ' -f 1 |sort |uniq -c |sort -rg |egrep -v 'USER|root' |head -10
+echo
+
+echo memory hogs:
+ps axu |sort -grk 4 |cut -d ' ' -f 1 |sort |uniq |head -5
+echo
+
+echo shell count:
+w | cut -d ' ' -f 1 |sort |uniq -c |sort -rg |grep -v USER |head -5
+echo
+
 if [ "$1" == "" ]
 then
   DELAY=2
@@ -9,6 +21,6 @@ else
   DELAY=$1
 fi
 
-
+echo Top CPU hogs:
 top -b -d$DELAY -n2 |grep -A 1 USER |tail -1 |awk '{ print $2 }'
 
