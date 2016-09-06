@@ -24,5 +24,5 @@ else
   DELAY=$1
 fi
 
-echo Top CPU hogs:
-top -b -d$DELAY -n2 |grep -A 1 USER |tail -1 |awk '{ print $2 }'
+echo Top two CPU hogs:
+top -b -d$DELAY -n2 |grep -A 2 USER |tail -2 |awk '{ print $2 }'
