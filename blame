@@ -1,13 +1,16 @@
 #!/bin/bash
 
-# Runs top for N seconds (defaults to 2) and tells you the username of the top CPU process.
-
 echo process count:
 ps axu | cut -d ' ' -f 1 |sort |uniq -c |sort -rg |egrep -v 'USER|root' |head -10
 echo
 
-echo memory hogs:
-ps axu |sort -grk 4 |cut -d ' ' -f 1 |sort |uniq |head -5
+echo 'Total ram per user (top 10):'
+(echo "user rss(KiB) vmem(KiB)";
+ for user in $(ps axk ruser  -o ruser= |uniq); do
+   echo $user $(ps -U $user --no-headers -o rss,vsz \
+     | awk '{rss+=$1; vmem+=$2} END{print rss" "vmem}')
+ done | sort -rgk 2
+) | column -t | head -11
 echo
 
 echo shell count:
@@ -23,4 +26,3 @@ fi
 
 echo Top CPU hogs:
 top -b -d$DELAY -n2 |grep -A 1 USER |tail -1 |awk '{ print $2 }'
-
