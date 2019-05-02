@@ -10,3 +10,4 @@ My collection of bash scripts and tricks
 * blame -- Runs top for a couple seconds and tells you the who is using the most CPU
 * git-prompt.sh -- Can be used in your bash prompt for git status.
   * git-prompt-chars.htm -- Helper HTML to show / create the unicode characters
+* my.bashrc -- My favorite / common Bash configurations
