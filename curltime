@@ -1,6 +1,9 @@
 #!/bin/bash
 
 curl -w @- -o /dev/null -s "$@" <<'EOF'
+        size_header:  %{size_header} bytes\n
+     speed_download:  %{speed_download} B/s\n
+\n
     time_namelookup:  %{time_namelookup}\n
        time_connect:  %{time_connect}\n
     time_appconnect:  %{time_appconnect}\n
