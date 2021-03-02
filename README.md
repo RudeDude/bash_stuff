@@ -12,3 +12,4 @@ My collection of bash scripts and tricks
   * git-prompt-chars.htm -- Helper HTML to show / create the unicode characters
 * my.bashrc -- My favorite / common Bash configurations
 * curltime -- Use curl to report fetch timing [thanks StackOverflow](https://stackoverflow.com/questions/18215389/how-do-i-measure-request-and-response-times-at-once-using-curl)
+* sb.sh -- Run a background job without the bash job noise [thanks StackOverflow](https://stackoverflow.com/questions/7686989/running-bash-commands-in-the-background-without-printing-job-and-process-ids)
