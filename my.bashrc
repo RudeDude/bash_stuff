@@ -16,3 +16,7 @@ PS1='$(anyErr)\t $(~/bin/git-prompt.sh)\n[\w]$ '
 # Thanks to Ubuntu there are now dozens of SNAP mount points
 alias dfh='df -h | grep -v snap'
 
+alias gitdiff='git -c core.whitespace=-trailing-space,-indent-with-non-tab,-tab-in-indent diff -U0 --word-diff-regex='[^[:space:]]' -bw'
+
+export TZ=`cat /etc/timezone`
+alias roll='rolldice -s'
