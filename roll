@@ -34,6 +34,7 @@ for request in $* ; do
   sum=0  # reset
   while [ ${dice:=1} -gt 0 ] ; do
     rolldie die $sides
+#    die=$(shuf -i 1-$sides -n 1)
     echo "     dice roll = $die"
     sum=$(( $sum + $die ))
     dice=$(( $dice - 1 ))
