@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# Pass any arg to add values
+
+if [ ! -z "$1" ]
+then
+  # arg given so print with values
+  jq -r 'paths(scalars) as $p  | [ ( [ $p[] | tostring ] | join(".") ), ( getpath($p) | tojson )] | join(":\t")'
+else
+  # no args so print keys only
+  jq -r 'paths(scalars) as $p  | [ ( [ $p[] | tostring ] | join(".") )] | .[]'
+fi

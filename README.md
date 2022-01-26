@@ -14,3 +14,4 @@ My collection of bash scripts and tricks
 * curltime -- Use curl to report fetch timing [thanks StackOverflow](https://stackoverflow.com/questions/18215389/how-do-i-measure-request-and-response-times-at-once-using-curl)
 * sb.sh -- Run a background job without the bash job noise [thanks StackOverflow](https://stackoverflow.com/questions/7686989/running-bash-commands-in-the-background-without-printing-job-and-process-ids)
 * roll -- Roll dice, e.g. `roll 1d6 2d10`
+* jq-keys -- Use `jq` to print (full path) keys from a json file. Call with any arg to also print the values.
