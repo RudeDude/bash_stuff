@@ -16,3 +16,5 @@ My collection of bash scripts and tricks
 * roll -- Roll dice, e.g. `roll 1d6 2d10`
 * jq-keys -- Use `jq` to print (full path) keys from a json file. Call with any arg to also print the values. [Thanks to StackExchange.](https://unix.stackexchange.com/questions/561460/how-to-print-path-and-key-values-of-json-file/561489#561489)
 * mk-dummy.sh -- Simplistic script to create dummy ethernet devices
+* docker-descendants.py -- Not BASH!? Found [this gist](https://gist.github.com/altaurog/21ea7afe578a523e3dfe8d8a746f1e7d
+) for Docker descendents
