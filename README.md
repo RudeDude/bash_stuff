@@ -22,3 +22,10 @@ My collection of bash scripts and tricks
 * gen-new-ssl.sh -- Generate self signed SSL root and certs.
 * Best_Keyboard_Shortcuts_for_Bash.pdf -- All the basic "EMACS" keyboard shortcuts in bash. [From howtogeek.com](https://www.howtogeek.com/howto/ubuntu/keyboard-shortcuts-for-bash-command-shell-for-ubuntu-debian-suse-redhat-linux-etc/)
 
+
+
+# The Pure Bash Bible
+https://github.com/dylanaraps/pure-bash-bible
+
+* documents commonly-known and lesser-known methods of doing various tasks using only built-in bash features. Using the snippets from this bible can help remove unneeded dependencies from scripts and in most cases make them faster.
+
