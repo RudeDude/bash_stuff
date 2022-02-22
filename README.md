@@ -18,3 +18,5 @@ My collection of bash scripts and tricks
 * mk-dummy.sh -- Simplistic script to create dummy ethernet devices
 * docker-descendants.py -- Not BASH!? Found [this gist](https://gist.github.com/altaurog/21ea7afe578a523e3dfe8d8a746f1e7d
 ) for Docker descendents
+* mybackup.sh -- A minimal, manual, backup script.
+
