@@ -1,0 +1,11 @@
+#!/bin/bash
+set -e
+set -o pipefail # propagate errors in piped commands
+
+if [[ "$1" == "" ]]; then
+  F=docker-compose.yml
+else
+  F="$1"
+fi
+
+grep -v '^    \+' docker-compose.yml |egrep -v '^ *#|^$'

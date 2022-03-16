@@ -21,6 +21,7 @@ My collection of bash scripts and tricks
 * mybackup.sh -- A minimal, manual, backup script.
 * gen-new-ssl.sh -- Generate self signed SSL root and certs.
 * Best_Keyboard_Shortcuts_for_Bash.pdf -- All the basic "EMACS" keyboard shortcuts in bash. [From howtogeek.com](https://www.howtogeek.com/howto/ubuntu/keyboard-shortcuts-for-bash-command-shell-for-ubuntu-debian-suse-redhat-linux-etc/)
+* compose-service-list -- Greps to show top levels of a docker-compose.yml file (service names).
 
 
 
