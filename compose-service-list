@@ -8,4 +8,4 @@ else
   F="$1"
 fi
 
-grep -v '^    \+' docker-compose.yml |egrep -v '^ *#|^$'
+grep -v '^    \+' $F |egrep -v '^ *#|^$'
