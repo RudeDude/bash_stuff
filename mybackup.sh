@@ -1,4 +1,9 @@
 #!/bin/bash
+set -e
+
+DEST=/net/nas0/mnt/tank/backups/drude
+# Ensure destination exists and is writeable
+touch ${DEST}/last-backup-now
 
 # Ensure we are in the homedir
 cd ~
@@ -31,5 +36,6 @@ echo
 mv /tmp/backup.tar.gz ./backup-`date -I`.tar.gz
 du -hc backup*.gz
 
-scp backup-*.tar.gz dr@laz.jarmansgap.com:/data1/dr/
-rm -f backup-*.tar.gz
+# scp backup-*.tar.gz ${DEST}
+# rm -f backup-*.tar.gz
+mv backup-*.tar.gz ${DEST}/
