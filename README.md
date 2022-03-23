@@ -29,4 +29,3 @@ My collection of bash scripts and tricks
 https://github.com/dylanaraps/pure-bash-bible
 
 * documents commonly-known and lesser-known methods of doing various tasks using only built-in bash features. Using the snippets from this bible can help remove unneeded dependencies from scripts and in most cases make them faster.
-
