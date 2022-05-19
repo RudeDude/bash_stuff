@@ -22,7 +22,7 @@ My collection of bash scripts and tricks
 * gen-new-ssl.sh -- Generate self signed SSL root and certs.
 * Best_Keyboard_Shortcuts_for_Bash.pdf -- All the basic "EMACS" keyboard shortcuts in bash. [From howtogeek.com](https://www.howtogeek.com/howto/ubuntu/keyboard-shortcuts-for-bash-command-shell-for-ubuntu-debian-suse-redhat-linux-etc/)
 * compose-service-list -- Greps to show top levels of a docker-compose.yml file (service names).
-* argus-pcap-summary.sh -- Uses Argus tooling to generate some summary info about a PCAP file.
+* argus-pcap-summary.sh -- Uses [Argus tooling](https://github.com/openargus?tab=repositories) to generate some summary info about a PCAP file.
 
 
 # The Pure Bash Bible
