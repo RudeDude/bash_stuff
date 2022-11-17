@@ -2,10 +2,14 @@
 set -e
 set -o pipefail # propagate errors in piped commands
 
+# Use CWD docker-compose.yml unless there was a CMD arg
+
 if [[ "$1" == "" ]]; then
   F=docker-compose.yml
 else
   F="$1"
 fi
 
+# skip (deep) indented lines
+# and skip comments
 grep -v '^    \+' $F |egrep -v '^ *#|^$'
