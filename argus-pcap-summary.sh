@@ -10,6 +10,8 @@ fi
 
 P=$1
 A="${P%.*}.argus"
+T="${P%.*}-summary.txt"
+TOPN="20"
 
 if [[ -s "$A" ]]
 then
@@ -25,22 +27,25 @@ else
   fi
 fi
 
-racount -M proto addr -r $A
-echo
+echo "Writing to text summary file $T ..."
+## Create empty test summary file
+echo > $T
 
-echo "UDP sources with flow count"
-ra -n -r $A -c , -s saddr,sport -- udp | sort | uniq -c |sort -g | tail -n 10
-echo
-echo "UDP destinations with flow count"
-ra -n -r $A -c , -s daddr,dport -- udp | sort | uniq -c |sort -g | tail -n 10
-echo
+racount -M proto addr -r $A >> $T
+echo >> $T
 
-echo "TCP sources with flow count"
-ra -n -r $A -c , -s saddr,sport -- tcp | sort | uniq -c |sort -g | tail -n 10
-echo
-echo "TCP destinations with flow count"
-ra -n -r $A -c , -s daddr,dport -- tcp | sort | uniq -c |sort -g | tail -n 10
-echo
+echo "UDP sources with flow count" >> $T
+ra -n -r $A -c , -s saddr,sport -- udp | sort | uniq -c |sort -g | tail -n $TOPN >> $T
+echo >> $T
+echo "UDP destinations with flow count" >> $T
+ra -n -r $A -c , -s daddr,dport -- udp | sort | uniq -c |sort -g | tail -n $TOPN >> $T
+echo >> $T
 
+echo "TCP sources with flow count" >> $T
+ra -n -r $A -c , -s saddr,sport -- tcp | sort | uniq -c |sort -g | tail -n $TOPN >> $T
+echo >> $T
+echo "TCP destinations with flow count" >> $T
+ra -n -r $A -c , -s daddr,dport -- tcp | sort | uniq -c |sort -g | tail -n $TOPN >> $T
+echo >> $T
 
 
