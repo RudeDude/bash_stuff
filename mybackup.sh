@@ -52,7 +52,7 @@ echo
 
 mv /tmp/backup.tar.gz ./backup-`date -I`.tar.gz
 du -hc backup*.gz
-exit 0
+
 # scp backup-*.tar.gz ${DEST}
 # rm -f backup-*.tar.gz
 echo moving to destination...
