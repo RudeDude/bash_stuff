@@ -20,3 +20,4 @@ alias gitdiff='git -c core.whitespace=-trailing-space,-indent-with-non-tab,-tab-
 
 export TZ=`cat /etc/timezone`
 alias roll='rolldice -s'
+alias dps='docker ps --format "table {{.Image}}\t{{.Command}}\t{{.RunningFor}}\t{{.Status}}"'
