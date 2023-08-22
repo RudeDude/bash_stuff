@@ -25,6 +25,7 @@ My collection of bash scripts and tricks
 * argus-pcap-summary.sh -- Uses [Argus tooling](https://github.com/openargus?tab=repositories) to generate some summary info about a PCAP file.
 * crontab-header.txt -- Useful text for self-documenting your crontab(s)
 * find-dupe-file-names.sh -- Find files in the current path with the same name. [Found on StackExchange](https://unix.stackexchange.com/questions/468440/find-all-files-with-the-same-name)
+* password-breach-checker -- Check breached password database by has prefixes. [Found on CloudFlare blog](https://blog.cloudflare.com/validating-leaked-passwords-with-k-anonymity/)
 
 # The Pure Bash Bible
 https://github.com/dylanaraps/pure-bash-bible
