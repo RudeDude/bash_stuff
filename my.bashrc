@@ -13,11 +13,19 @@ HISTFILESIZE=200000
 function anyErr { x=$?; [ $x -ne 0 ] && echo -n "$x |"; }
 PS1='$(anyErr)\t $(~/bin/git-prompt.sh)\n[\w]$ '
 
-# Thanks to Ubuntu there are now dozens of SNAP mount points
+# Thanks to Ubuntu there are now dozens of SNAP mount points that show up in "df" output
 alias dfh='df -h | grep -v snap'
-
+# An agressive set of whitespace killing options for "git diff"
 alias gitdiff='git -c core.whitespace=-trailing-space,-indent-with-non-tab,-tab-in-indent diff -U0 --word-diff-regex='[^[:space:]]' -bw'
 
 export TZ=`cat /etc/timezone`
 alias roll='rolldice -s'
 alias dps='docker ps --format "table {{.Image}}\t{{.Command}}\t{{.RunningFor}}\t{{.Status}}"'
+
+# A "nice" date format to include fractional seconds
+alias mydate="date '+%Z %Y-%m-%d %H:%M:%S.%N'"
+
+## Set some additoinal java home params for Maven or whatever.
+#export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+export JAVA_HOME_8=/usr/lib/jvm/java-8-openjdk-amd64
+export JAVA_HOME_17=/usr/lib/jvm/java-17-openjdk-amd64
