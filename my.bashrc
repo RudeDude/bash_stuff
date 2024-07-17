@@ -19,7 +19,7 @@ alias dfh='df -h | grep -v snap'
 alias gitdiff='git -c core.whitespace=-trailing-space,-indent-with-non-tab,-tab-in-indent diff -U0 --word-diff-regex='[^[:space:]]' -bw'
 
 export TZ=`cat /etc/timezone`
-alias roll='rolldice -s'
+#alias roll='rolldice -s'
 alias dps='docker ps --format "table {{.Image}}\t{{.Command}}\t{{.RunningFor}}\t{{.Status}}"'
 
 # A "nice" date format to include fractional seconds
@@ -29,3 +29,6 @@ alias mydate="date '+%Z %Y-%m-%d %H:%M:%S.%N'"
 #export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 export JAVA_HOME_8=/usr/lib/jvm/java-8-openjdk-amd64
 export JAVA_HOME_17=/usr/lib/jvm/java-17-openjdk-amd64
+
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash
+export PATH=$HOME/bin:$PATH
