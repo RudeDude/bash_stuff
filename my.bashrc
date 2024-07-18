@@ -25,6 +25,9 @@ alias dps='docker ps --format "table {{.Image}}\t{{.Command}}\t{{.RunningFor}}\t
 # A "nice" date format to include fractional seconds
 alias mydate="date '+%Z %Y-%m-%d %H:%M:%S.%N'"
 
+alias docker-compose="docker compose"
+alias python=python3
+
 ## Set some additoinal java home params for Maven or whatever.
 #export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 export JAVA_HOME_8=/usr/lib/jvm/java-8-openjdk-amd64
