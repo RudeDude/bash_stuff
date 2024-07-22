@@ -35,3 +35,4 @@ export JAVA_HOME_17=/usr/lib/jvm/java-17-openjdk-amd64
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 export PATH=$HOME/bin:$PATH
+export EDITOR=nano
