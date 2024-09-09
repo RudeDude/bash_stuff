@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 # Started with code taken from http://www.piware.de/2011/01/creating-an-https-server-in-python/
+# Written by Don J. Rude, 2024-04-12
 
 import http.server
 import ssl

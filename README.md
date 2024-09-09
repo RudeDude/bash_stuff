@@ -26,6 +26,7 @@ My collection of bash scripts and tricks
 * find-dupe-file-names.sh -- Find files in the current path with the same name. [Found on StackExchange](https://unix.stackexchange.com/questions/468440/find-all-files-with-the-same-name)
 * password-breach-checker -- Check breached password database by has prefixes. [Found on CloudFlare blog](https://blog.cloudflare.com/validating-leaked-passwords-with-k-anonymity/)
 * simple-https-server.py -- Python (gasp!) 3.10 compatible HTTP server with SSL (self signed random key from OpenSSL). Serves up a folder of files.
+* payload-dumper.py -- Python script using `scapy` library to dump PCAP payload bytes to a file.
 
 # The Pure Bash Bible
 https://github.com/dylanaraps/pure-bash-bible
