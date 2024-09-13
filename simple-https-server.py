@@ -44,5 +44,6 @@ httpd = http.server.HTTPServer(server_address, http.server.SimpleHTTPRequestHand
 httpd.socket = ctx.wrap_socket(httpd.socket, server_side=True)
 print("Listening on port:", args.port)
 print("Using hostname:", args.host)
+print("https://", args.host, ":", args.port, "/", sep='')
 httpd.serve_forever()
 
