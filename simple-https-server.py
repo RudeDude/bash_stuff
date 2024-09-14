@@ -9,7 +9,8 @@ import subprocess
 import os
 import argparse
 
-HOSTNAME=os.uname()[1] + '.ccri.com'
+DOM='donrude.com'
+HOSTNAME=os.uname()[1] + '.' + DOM
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-d', '--directory', default=os.getcwd(),
@@ -31,8 +32,8 @@ else:
   print("Generating new key and cert")
   subprocess.run('openssl req -new -x509 -keyout '+ KEY
     +' -out '+ CERT
-    +' -days 365 -nodes -subj "/C=US/ST=Virginia/L=Charlottesville/O=GA-CCRi/OU=Optix/'
-    +'CN=' + args.host +'"', shell=True)
+    +' -days 365 -nodes -subj "/C=US/ST=Virginia/L=Charlottesville/O='+ DOM
+    +'/OU=simple-https-py/CN=' + args.host +'"', shell=True)
 
 ctx = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS_SERVER)
 ctx.load_cert_chain(certfile=CERT, keyfile=KEY)
