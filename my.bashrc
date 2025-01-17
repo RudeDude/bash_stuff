@@ -14,7 +14,7 @@ function anyErr { x=$?; [ $x -ne 0 ] && echo -n "$x |"; }
 PS1='$(anyErr)\t $(~/bin/git-prompt.sh)\n[\w]$ '
 
 # Thanks to Ubuntu there are now dozens of SNAP mount points that show up in "df" output
-alias dfh='df -h | grep -v snap'
+alias dfh="df -h | egrep -v 'snap|tmpfs'"
 # An agressive set of whitespace killing options for "git diff"
 alias gitdiff='git -c core.whitespace=-trailing-space,-indent-with-non-tab,-tab-in-indent diff -U0 --word-diff-regex='[^[:space:]]' -bw'
 
