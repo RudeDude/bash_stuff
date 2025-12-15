@@ -27,5 +27,15 @@ haveged -n ${COUNT} -f - 2>/dev/null |base64 -w 0 |sed 's/=//g'
 # Openssl random hex (16 bytes worth)
 # openssl rand -hex 16
 
+# NIST random pulse beacon
+# https://csrc.nist.gov/Projects/interoperable-randomness-beacons/beacon-20
+# curl -s https://beacon.nist.gov/beacon/2.0/pulse/last | jq -r '.pulse | [.chainIndex, .pulseIndex] |@csv'
+# .pulse.localRandomValue
+# .pulse.listValues[0].value
+#
+# curl -s https://beacon.nist.gov/beacon/2.0/chain/last/pulse/last | jq '.pulse.chainIndex, .pulse.pulseIndex, .pulse.timeStamp, .pulse.localRandomValue, .pulse.listValues[0].value'
+# curl -s https://beacon.nist.gov/beacon/2.0/pulse/last | jq -r '.pulse | [.chainIndex, .pulseIndex] |@csv'
+
+
 echo
 
