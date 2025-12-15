@@ -24,5 +24,8 @@ haveged -n ${COUNT} -f - 2>/dev/null |base64 -w 0 |sed 's/=//g'
 # Tends to have a trailing slash from the Base64 encoding
 #curl -s "https://csprng.xyz/v1/api?length=$COUNT" | jq --raw-output .Data | sed 's/=$//'
 
+# Openssl random hex (16 bytes worth)
+# openssl rand -hex 16
+
 echo
 
