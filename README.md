@@ -28,6 +28,7 @@ My collection of bash scripts and tricks
 * simple-https-server.py -- Python (gasp!) 3.10 compatible HTTP server with SSL (self signed random key from OpenSSL). Serves up a folder of files.
 * payload-dumper.py -- Python script using `scapy` library to dump PCAP payload bytes to a file.
 * systemd-bash-service.sh -- Template/wrapper for making a bash script (e.g. data scraper) into a SystemD service.
+* year-progress.sh -- Calculate current year completion percentage and draw a progress bar [Inspired by "year progress bar"](https://hugovk.github.io/year-progress-bar/)
 
 # The Pure Bash Bible
 https://github.com/dylanaraps/pure-bash-bible
