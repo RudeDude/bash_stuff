@@ -29,6 +29,7 @@ My collection of bash scripts and tricks
 * payload-dumper.py -- Python script using `scapy` library to dump PCAP payload bytes to a file.
 * systemd-bash-service.sh -- Template/wrapper for making a bash script (e.g. data scraper) into a SystemD service.
 * year-progress.sh -- Calculate current year completion percentage and draw a progress bar [Inspired by "year progress bar"](https://hugovk.github.io/year-progress-bar/)
+* docker-load-all.sh -- I got tired of recreating this script to "docker load" a pile of images in a folder.
 
 # The Pure Bash Bible
 https://github.com/dylanaraps/pure-bash-bible
