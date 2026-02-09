@@ -14,7 +14,7 @@ set -e
 
 echo -n "Trying to load images from: "
 pwd
-for X in *gz ; do
+for X in *.gz *.tgz ; do
   if [[ -f "$X" ]] ; then
     echo $X
     zcat $X | docker load

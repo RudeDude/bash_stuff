@@ -30,6 +30,7 @@ My collection of bash scripts and tricks
 * systemd-bash-service.sh -- Template/wrapper for making a bash script (e.g. data scraper) into a SystemD service.
 * year-progress.sh -- Calculate current year completion percentage and draw a progress bar [Inspired by "year progress bar"](https://hugovk.github.io/year-progress-bar/)
 * docker-load-all.sh -- I got tired of recreating this script to "docker load" a pile of images in a folder.
+* docker-save-list.sh -- Cat in a list of image URLs, they get saved in compressed tarballs (one per image).
 
 # The Pure Bash Bible
 https://github.com/dylanaraps/pure-bash-bible
