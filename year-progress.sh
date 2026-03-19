@@ -52,13 +52,10 @@ p=$(echo "$calc" | bc -l) # float range 0-1
 perc=$(echo "100 * $p" | bc -l) # percentage
 prog=$(echo "10000 * $p" | bc -l | sed "s#\..*###") # integer for progress bar
 
-#echo "DEBUG: year $year start $start end $end now $now calc $calc p $p perc $perc prog $prog"
 
-if [ "$1" == "-d" ]; then
-  echo "calc $calc"
-#  echo "p $p"
-#  echo "perc $perc"
-#  echo "prog $prog"
+if [ "$1" == "-v" ]; then
+  echo "DEBUG: year $year start $start end $end now $now calc $calc p $p perc $perc prog $prog"
 fi
+
 progress_bar "$prog" "10000" "$year"
 echo ${perc:0:21}" %"
