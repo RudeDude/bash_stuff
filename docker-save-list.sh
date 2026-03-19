@@ -11,7 +11,7 @@ echo "Trying to load image URLs from STDIN."
 echo "Saving to ./images folder..."
 while IFS= read -r X; do
   #echo "URL: $X"
-  
+  docker pull "$X"
   # Generate a short name without the base URL
   # And replace / with _
   # And replace : with _TAG_
