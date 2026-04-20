@@ -1,0 +1,48 @@
+<HTML><HEAD>
+<TITLE>Year progress bar</TITLE>
+</HEAD>
+<BODY>
+
+Written by Don J. Rude on 2025-12-30 (bash version).<BR>
+HTML / basic JavaScript version translated by Grok on 2026-04-20.<BR>
+<P>
+
+<div id="year-progress" style="font-family: monospace; text-align: center; padding: 10px;">
+  <div id="year-label" style="font-size: 1.4em; margin-bottom: 6px;"></div>
+  <div id="progress-bar" style="font-size: 1.2em; letter-spacing: 2px; margin: 8px 0; white-space: pre;"></div>
+  <div id="percentage" style="font-size: 1.35em; font-weight: bold;"></div>
+</div>
+
+<script>
+// High-precision Year Progress - Updates 10 times per second
+function updateYearProgress() {
+    const now = new Date();
+    const year = now.getFullYear();
+
+    // Start of this year (Jan 1 00:00:00)
+    const start = new Date(year, 0, 1);
+    // Start of next year
+    const end = new Date(year + 1, 0, 1);
+
+    // Precise progress calculation (0 to 1)
+    const progress = (now - start) / (end - start);
+
+    // For the progress bar - using 100 slots for smooth visual
+    const filledSlots = Math.floor(progress * 100);
+    const bar = '[' + '#'.repeat(filledSlots) + '-'.repeat(100 - filledSlots) + ']';
+
+    // Percentage with high precision (matching your original bash ridiculous precision)
+    const percentage = (progress * 100).toFixed(15);
+
+    // Update DOM elements
+    document.getElementById('year-label').textContent = year;
+    document.getElementById('progress-bar').textContent = bar;
+    document.getElementById('percentage').textContent = percentage + " %";
+}
+
+// Initial call + update 10 times per second (every 100ms)
+updateYearProgress();
+setInterval(updateYearProgress, 100);
+</script>
+
+</BODY>
