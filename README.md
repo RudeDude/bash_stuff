@@ -32,6 +32,7 @@ My collection of bash scripts and tricks
   * year-progress.html -- Simple JavaScript version with basic HTML tags for page embedding.
 * docker-load-all.sh -- I got tired of recreating this script to "docker load" a pile of images in a folder.
 * docker-save-list.sh -- Cat in a list of image URLs, they get saved in compressed tarballs (one per image).
+* ntp_scanner.py -- Python (gasp!) uses NTP pool DNS and checks for hop-distance and ping RTT, logs all findings, shows "top 10".
 
 # The Pure Bash Bible
 https://github.com/dylanaraps/pure-bash-bible
