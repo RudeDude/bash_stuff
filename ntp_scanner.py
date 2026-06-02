@@ -226,7 +226,7 @@ def print_shutdown_chrony_report(best_results):
         return
 
     sources = parse_chrony_sources(sources_text)
-    stats = parse_chrony_sourcestats(run_chronyc(["-n", "sourcestats"]) or "")
+#    stats = parse_chrony_sourcestats(run_chronyc(["-n", "sourcestats"]) or "")
     measured = dict(sorted_measured(best_results))
     chrony_ips = set(sources)
 
@@ -235,21 +235,21 @@ def print_shutdown_chrony_report(best_results):
         print("\n⏱️  Chrony sources in scanner results (clock stats + scanner RTT):")
         for ip in sorted(overlap, key=lambda i: measured[i]["rtt"]):
             src = sources[ip]
-            st = stats.get(ip, {})
+            #st = stats.get(ip, {})
             data = measured[ip]
             state = src.get("state", "?")
             sample = src.get("sample", "N/A")
             method = data.get("rtt_method", "ping")
             print(f"   {ip:15} [{state}]  scanner RTT: {data['rtt']:.1f} ms ({method})")
             print(f"      sources: stratum {src.get('stratum')} | reach {src.get('reach')} | {sample}")
-            if st:
-                print(
-                    f"      sourcestats: offset {st.get('offset')} | std dev {st.get('stddev')} | "
-                    f"freq {st.get('freq')} ppm | skew {st.get('skew')} ppm | "
-                    f"span {st.get('span')}s (NP {st.get('np')}, NR {st.get('nr')})"
-                )
-            else:
-                print("      sourcestats: (no entry)")
+#            if st:
+#                print(
+#                    f"      sourcestats: offset {st.get('offset')} | std dev {st.get('stddev')} | "
+#                    f"freq {st.get('freq')} ppm | skew {st.get('skew')} ppm | "
+#                    f"span {st.get('span')}s (NP {st.get('np')}, NR {st.get('nr')})"
+#                )
+#            else:
+#                print("      sourcestats: (no entry)")
     else:
         print("\n   (No chrony sources overlap with scanner results)")
 
