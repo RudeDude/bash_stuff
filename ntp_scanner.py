@@ -148,6 +148,124 @@ def measure_hops(ip, max_hops=MAX_HOPS):
     return None
 
 
+def run_chronyc(args):
+    if not shutil.which("chronyc"):
+        return None
+    try:
+        return subprocess.check_output(
+            ["chronyc"] + args, stderr=subprocess.STDOUT, timeout=10
+        ).decode(errors="ignore")
+    except Exception:
+        return None
+
+
+def parse_chrony_sources(text):
+    """Parse `chronyc -n sources` into {ip: {state, stratum, reach, sample, ...}}."""
+    sources = {}
+    for line in text.splitlines():
+        if not line or line.startswith("MS ") or line.startswith("==="):
+            continue
+        m = re.match(
+            r"^(?P<state>\S+)\s+(?P<name>\S+)\s+"
+            r"(?P<stratum>\d+)\s+(?P<poll>\d+)\s+(?P<reach>\d+)\s+(?P<last_rx>\d+)\s+"
+            r"(?P<sample>.+)$",
+            line,
+        )
+        if m:
+            sources[m.group("name")] = m.groupdict()
+    return sources
+
+
+def parse_chrony_sourcestats(text):
+    """Parse `chronyc -n sourcestats` into {name_or_ip: {offset, std_dev, ...}}."""
+    stats = {}
+    for line in text.splitlines():
+        if not line or line.startswith("Name/") or line.startswith("==="):
+            continue
+        m = re.match(
+            r"^(?P<name>\S+)\s+(?P<np>\d+)\s+(?P<nr>\d+)\s+(?P<span>\d+)\s+"
+            r"(?P<freq>[\d.+-]+)\s+(?P<skew>[\d.+-]+)\s+(?P<offset>\S+)\s+(?P<stddev>\S+)",
+            line,
+        )
+        if m:
+            stats[m.group("name")] = m.groupdict()
+    return stats
+
+
+def sorted_measured(best_results):
+    measured = {ip: d for ip, d in best_results.items() if d.get("rtt") is not None}
+    return sorted(
+        measured.items(),
+        key=lambda x: (x[1]["rtt"] or 999, x[1]["hops"] or 999),
+    )
+
+
+def print_top_servers(best_results, n=20):
+    ranked = sorted_measured(best_results)
+    if not ranked:
+        print("   (No successful RTT measurements yet)")
+        return
+    print(f"\n🏆 Top {n} best NTP servers so far (by RTT, then hops):")
+    for rank, (ip, data) in enumerate(ranked[:n], 1):
+        hops_display = str(data["hops"]) if data["hops"] is not None else "N/A"
+        method = data.get("rtt_method", "ping")
+        tests = get_test_count(data)
+        print(
+            f"   {rank:2d}. {ip:15} | RTT: {data['rtt']:6.1f} ms ({method}) | "
+            f"Hops: {hops_display:>3} | Seen: {data['seen']}× | Tests: {tests}"
+        )
+
+
+def print_shutdown_chrony_report(best_results):
+    """Compare scanner results with active chrony sources on exit."""
+    print_top_servers(best_results, 20)
+
+    sources_text = run_chronyc(["-n", "sources"])
+    if not sources_text:
+        print("\n⚠️  chronyc unavailable; skipping chrony comparison.")
+        return
+
+    sources = parse_chrony_sources(sources_text)
+    stats = parse_chrony_sourcestats(run_chronyc(["-n", "sourcestats"]) or "")
+    measured = dict(sorted_measured(best_results))
+    chrony_ips = set(sources)
+
+    overlap = [ip for ip in chrony_ips if ip in measured]
+    if overlap:
+        print("\n⏱️  Chrony sources in scanner results (clock stats + scanner RTT):")
+        for ip in sorted(overlap, key=lambda i: measured[i]["rtt"]):
+            src = sources[ip]
+            st = stats.get(ip, {})
+            data = measured[ip]
+            state = src.get("state", "?")
+            sample = src.get("sample", "N/A")
+            method = data.get("rtt_method", "ping")
+            print(f"   {ip:15} [{state}]  scanner RTT: {data['rtt']:.1f} ms ({method})")
+            print(f"      sources: stratum {src.get('stratum')} | reach {src.get('reach')} | {sample}")
+            if st:
+                print(
+                    f"      sourcestats: offset {st.get('offset')} | std dev {st.get('stddev')} | "
+                    f"freq {st.get('freq')} ppm | skew {st.get('skew')} ppm | "
+                    f"span {st.get('span')}s (NP {st.get('np')}, NR {st.get('nr')})"
+                )
+            else:
+                print("      sourcestats: (no entry)")
+    else:
+        print("\n   (No chrony sources overlap with scanner results)")
+
+    unused = [(ip, d) for ip, d in sorted_measured(best_results) if ip not in chrony_ips]
+    print("\n💡 Top 4 scanner RTTs not in chrony sources:")
+    if not unused:
+        print("   (none — all top scanner hits are already chrony sources)")
+        return
+    for rank, (ip, data) in enumerate(unused[:4], 1):
+        hops_display = str(data["hops"]) if data["hops"] is not None else "N/A"
+        method = data.get("rtt_method", "ping")
+        print(
+            f"   {rank}. {ip:15} | RTT: {data['rtt']:6.1f} ms ({method}) | Hops: {hops_display:>3}"
+        )
+
+
 def main():
     parser = argparse.ArgumentParser(description="NTP closest server finder – persistent data")
     parser.add_argument("--hostname", default="us.pool.ntp.org", help="NTP pool hostname")
@@ -220,32 +338,17 @@ def main():
             # Save after every cycle
             save_results(best_results)
 
-            # Show leaderboard
-            measured = {ip: d for ip, d in best_results.items() if d.get("rtt") is not None}
-            if measured:
-                sorted_best = sorted(
-                    measured.items(),
-                    key=lambda x: (x[1]["rtt"] or 999, x[1]["hops"] or 999),
-                )
-                print("\n🏆 Top 20 best NTP servers so far (by RTT, then hops):")
-                for rank, (ip, data) in enumerate(sorted_best[:20], 1):
-                    hops_display = str(data["hops"]) if data["hops"] is not None else "N/A"
-                    method = data.get("rtt_method", "ping")
-                    tests = get_test_count(data)
-                    print(
-                        f"   {rank:2d}. {ip:15} | RTT: {data['rtt']:6.1f} ms ({method}) | "
-                        f"Hops: {hops_display:>3} | Seen: {data['seen']}× | Tests: {tests}"
-                    )
-            else:
-                print("   (No successful RTT measurements yet)")
+            print_top_servers(best_results, 20)
 
             print(f"   💾 Saved {len(best_results)} entries to {DATA_FILE}")
             print(f"   Sleeping {args.sleep} seconds before next cycle...\n")
             time.sleep(args.sleep)
 
     except KeyboardInterrupt:
-        save_results(best_results)  # final save on exit
-        print("\n\n✅ Stopped by user. Data saved! Happy time-syncing! ⏰")
+        save_results(best_results)
+        print("\n\n✅ Stopped by user. Data saved!")
+        print_shutdown_chrony_report(best_results)
+        print("Happy time-syncing! ⏰")
 
 
 if __name__ == "__main__":
