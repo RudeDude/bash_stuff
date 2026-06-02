@@ -225,9 +225,9 @@ def main():
             if measured:
                 sorted_best = sorted(
                     measured.items(),
-                    key=lambda x: (x[1]["hops"] or 999, x[1]["rtt"] or 999),
+                    key=lambda x: (x[1]["rtt"] or 999, x[1]["hops"] or 999),
                 )
-                print("\n🏆 Top 20 best NTP servers so far (by hops, then RTT):")
+                print("\n🏆 Top 20 best NTP servers so far (by RTT, then hops):")
                 for rank, (ip, data) in enumerate(sorted_best[:20], 1):
                     hops_display = str(data["hops"]) if data["hops"] is not None else "N/A"
                     method = data.get("rtt_method", "ping")
