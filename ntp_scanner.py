@@ -15,6 +15,9 @@ import os
 
 
 DATA_FILE = "ntp_best_servers.json"
+MAX_TESTS_PER_IP = 10
+MAX_HOPS = 64
+NTP_PORT = 123
 
 
 def load_results(filename=DATA_FILE):
@@ -53,6 +56,55 @@ def get_ntp_ips(hostname="us.pool.ntp.org", tries=8):
     return list(ips)
 
 
+def get_test_count(entry):
+    """How many times this IP has been measured (persisted across runs)."""
+    return int(entry.get("tests", entry.get("seen", 0)))
+
+
+def ensure_ip_entry(best_results, ip):
+    if ip not in best_results:
+        best_results[ip] = {"rtt": None, "hops": None, "seen": 0, "tests": 0}
+    elif "tests" not in best_results[ip]:
+        best_results[ip]["tests"] = get_test_count(best_results[ip])
+
+
+def needs_ntp_fallback(rtt, hops, max_hops=MAX_HOPS):
+    """Ping failed and traceroute hit the hop limit without reaching the host."""
+    return rtt is None and hops is not None and hops >= max_hops
+
+
+def measure_ntp_rtt(ip, timeout=3.0):
+    """
+    Estimate round-trip delay with one NTP client request (UDP port 123).
+    A single 48-byte packet is standard client behavior and is gentle on servers.
+    """
+    packet = b"\x1b" + 47 * b"\0"  # NTPv4 client mode (LI=0, VN=4, Mode=3)
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+            sock.settimeout(timeout)
+            t0 = time.perf_counter()
+            sock.sendto(packet, (ip, NTP_PORT))
+            sock.recvfrom(1024)
+            t1 = time.perf_counter()
+            return (t1 - t0) * 1000.0
+    except Exception:
+        pass
+
+    if shutil.which("ntpdate"):
+        try:
+            out = subprocess.check_output(
+                ["ntpdate", "-q", ip],
+                stderr=subprocess.STDOUT,
+                timeout=timeout + 2,
+            ).decode(errors="ignore")
+            m = re.search(r"\+\/\- ([\d.]+)", out)
+            if m:
+                return float(m.group(1)) * 1000.0
+        except Exception:
+            pass
+    return None
+
+
 def measure_rtt(ip, count=3):
     """Ping and return average RTT in ms."""
     try:
@@ -67,7 +119,7 @@ def measure_rtt(ip, count=3):
         return None
 
 
-def measure_hops(ip, max_hops=64):
+def measure_hops(ip, max_hops=MAX_HOPS):
     """Try ICMP traceroute, then fall back to UDP."""
     for use_icmp in [True, False]:
         try:
@@ -129,39 +181,61 @@ def main():
             print(f"   Resolved {len(ips)} unique IP(s)")
 
             for ip in ips:
+                ensure_ip_entry(best_results, ip)
+                if get_test_count(best_results[ip]) >= MAX_TESTS_PER_IP:
+                    print(f"   {ip:15} → skipped (tested {MAX_TESTS_PER_IP}+ times)")
+                    continue
+
                 print(f"   {ip:15} → ", end="")
+                best_results[ip]["tests"] = get_test_count(best_results[ip]) + 1
+
                 rtt = measure_rtt(ip, args.pings)
                 hops = measure_hops(ip)
+                rtt_method = "ping"
+
+                if needs_ntp_fallback(rtt, hops):
+                    ntp_rtt = measure_ntp_rtt(ip)
+                    if ntp_rtt is not None:
+                        rtt = ntp_rtt
+                        rtt_method = "ntp"
 
                 rtt_str = f"{rtt:.1f}ms" if rtt is not None else "N/A"
                 hops_str = str(hops) if hops is not None else "N/A"
-                print(f" RTT: {rtt_str:>6} | Hops: {hops_str:>3}")
+                method_str = f" [{rtt_method}]" if rtt is not None else ""
+                print(f" RTT: {rtt_str:>6}{method_str} | Hops: {hops_str:>3}")
 
                 if rtt is not None:
-                    if ip not in best_results or rtt < best_results[ip]["rtt"]:
-                        best_results[ip] = {
-                            "rtt": rtt,
-                            "hops": hops,
-                            "seen": 1
-                        }
+                    entry = best_results[ip]
+                    prev = entry.get("rtt")
+                    if prev is None or rtt < prev:
+                        entry["rtt"] = rtt
+                        entry["hops"] = hops
+                        entry["rtt_method"] = rtt_method
+                        entry["seen"] = 1
                     else:
-                        best_results[ip]["seen"] += 1
+                        entry["seen"] = entry.get("seen", 0) + 1
+                    if hops is not None and entry.get("hops") is None:
+                        entry["hops"] = hops
 
             # Save after every cycle
             save_results(best_results)
 
             # Show leaderboard
-            if best_results:
+            measured = {ip: d for ip, d in best_results.items() if d.get("rtt") is not None}
+            if measured:
                 sorted_best = sorted(
-                    best_results.items(),
-                    key=lambda x: (x[1]["hops"], x[1]["rtt"] or 999)
-#                    key=lambda x: (x[1]["rtt"], x[1]["hops"] or 999)
+                    measured.items(),
+                    key=lambda x: (x[1]["hops"] or 999, x[1]["rtt"] or 999),
                 )
-                print("\n🏆 Top 20 best NTP servers so far (by RTT, then hops):")
+                print("\n🏆 Top 20 best NTP servers so far (by hops, then RTT):")
                 for rank, (ip, data) in enumerate(sorted_best[:20], 1):
                     hops_display = str(data["hops"]) if data["hops"] is not None else "N/A"
-                    print(f"   {rank:2d}. {ip:15} | RTT: {data['rtt']:6.1f} ms | "
-                          f"Hops: {hops_display:>3} | Seen: {data['seen']}×")
+                    method = data.get("rtt_method", "ping")
+                    tests = get_test_count(data)
+                    print(
+                        f"   {rank:2d}. {ip:15} | RTT: {data['rtt']:6.1f} ms ({method}) | "
+                        f"Hops: {hops_display:>3} | Seen: {data['seen']}× | Tests: {tests}"
+                    )
             else:
                 print("   (No successful RTT measurements yet)")
 
