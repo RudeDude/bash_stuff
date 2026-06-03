@@ -49,15 +49,34 @@ def save_results(best_results, filename=DATA_FILE):
         print(f"⚠️  Could not save to {filename} (data still in memory)")
 
 
-def get_ntp_ips(hostname="us.pool.ntp.org", tries=8):
-    """Resolve the pool multiple times for fresh IPs."""
+POOL_HOST_RE = re.compile(r"^(?:(\d+)\.)?([a-z0-9-]+)\.pool\.ntp\.org\.?$", re.IGNORECASE)
+
+
+def pool_hostnames(hostname, expand_pool=True):
+    """
+    NTP pool DNS returns ~4 A records per name. Expand zone.pool.ntp.org into
+    0–3.zone.pool.ntp.org (plus the zone itself) for many more unique peers.
+    """
+    if not expand_pool:
+        return [hostname]
+    m = POOL_HOST_RE.match(hostname)
+    if not m or m.group(1) is not None:
+        return [hostname]
+    zone = m.group(2)
+    return [hostname] + [f"{i}.{zone}.pool.ntp.org" for i in range(4)]
+
+
+def get_ntp_ips(hostname="us.pool.ntp.org", tries=40, expand_pool=True):
+    """Resolve pool hostname(s) repeatedly; rotate subdomains for more unique IPs."""
+    hosts = pool_hostnames(hostname, expand_pool)
     ips = set()
-    for _ in range(tries):
+    for i in range(tries):
+        host = hosts[i % len(hosts)]
         try:
-            addrs = socket.getaddrinfo(hostname, "123", family=socket.AF_INET)
+            addrs = socket.getaddrinfo(host, "123", family=socket.AF_INET)
             for addr in addrs:
                 ips.add(addr[4][0])
-        except Exception:
+        except OSError:
             pass
     return list(ips)
 
@@ -337,6 +356,17 @@ def print_shutdown_chrony_report(best_results):
 def main():
     parser = argparse.ArgumentParser(description="NTP closest server finder – persistent data")
     parser.add_argument("--hostname", default="us.pool.ntp.org", help="NTP pool hostname")
+    parser.add_argument(
+        "--resolve-tries",
+        type=int,
+        default=40,
+        help="DNS lookups per cycle (rotates pool subdomains 0–3)",
+    )
+    parser.add_argument(
+        "--no-pool-expand",
+        action="store_true",
+        help="Only resolve --hostname (no 0–3.pool subdomain expansion)",
+    )
     parser.add_argument("--sleep", type=int, default=15, help="Sleep between cycles (seconds)")
     parser.add_argument("--pings", type=int, default=3, help="Pings per IP")
     parser.add_argument("--reset", action="store_true", help="Clear saved data and start fresh")
@@ -353,8 +383,14 @@ def main():
         print("🗑️  Reset: previous saved data cleared.")
     best_results = load_results()
 
+    pool_hosts = pool_hostnames(args.hostname, expand_pool=not args.no_pool_expand)
     print(f"🚀 NTP Scanner started for {args.hostname}")
-    print(f"   Sleep: {args.sleep}s | Pings: {args.pings} | Persistent file: {DATA_FILE}")
+    print(
+        f"   Resolve: {args.resolve_tries} lookups across {len(pool_hosts)} name(s) | "
+        f"Pings: {args.pings} | Persistent file: {DATA_FILE}"
+    )
+    if len(pool_hosts) > 1:
+        print(f"   Pool names: {', '.join(pool_hosts)}")
     print("   Press Ctrl+C to stop.\n")
 
     iteration = 0
@@ -363,8 +399,20 @@ def main():
             iteration += 1
             print(f"─── Iteration {iteration} ───")
 
-            ips = get_ntp_ips(args.hostname)
-            print(f"   Resolved {len(ips)} unique IP(s)")
+            ips = get_ntp_ips(
+                args.hostname,
+                tries=args.resolve_tries,
+                expand_pool=not args.no_pool_expand,
+            )
+            pollable = sum(
+                1
+                for ip in ips
+                if get_test_count(best_results.get(ip, {})) < MAX_TESTS_PER_IP
+            )
+            print(
+                f"   Resolved {len(ips)} unique IP(s) "
+                f"({pollable} still under {MAX_TESTS_PER_IP} tests)"
+            )
 
             for ip in ips:
                 ensure_ip_entry(best_results, ip)
