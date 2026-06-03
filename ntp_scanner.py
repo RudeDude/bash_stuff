@@ -12,9 +12,15 @@ import argparse
 import shutil
 import json
 import os
+import glob
 
 
 DATA_FILE = "ntp_best_servers.json"
+CHRONY_CONF_CANDIDATES = ("/etc/chrony/chrony.conf", "/etc/chrony.conf")
+SERVER_RE = re.compile(r"^\s*#?\s*server\s+(\S+)", re.IGNORECASE)
+CONFDIR_RE = re.compile(r"^\s*#?\s*confdir\s+(\S+)", re.IGNORECASE)
+SOURCEDIR_RE = re.compile(r"^\s*#?\s*sourcedir\s+(\S+)", re.IGNORECASE)
+IPV4_RE = re.compile(r"^\d{1,3}(?:\.\d{1,3}){3}$")
 MAX_TESTS_PER_IP = 10
 MAX_HOPS = 64
 NTP_PORT = 123
@@ -176,6 +182,63 @@ def parse_chrony_sources(text):
     return sources
 
 
+def find_chrony_conf_file():
+    for path in CHRONY_CONF_CANDIDATES:
+        if os.path.isfile(path):
+            return path
+    return None
+
+
+def chrony_conf_files(conf_path=None):
+    """Collect main chrony.conf plus active confdir/sourcedir snippets."""
+    main = conf_path or find_chrony_conf_file()
+    if not main:
+        return []
+    files = [main]
+    extra_dirs = []
+    try:
+        with open(main, "r") as f:
+            for line in f:
+                if line.lstrip().startswith("#"):
+                    continue
+                m = CONFDIR_RE.match(line) or SOURCEDIR_RE.match(line)
+                if m:
+                    extra_dirs.append(m.group(1))
+    except OSError:
+        return files
+    for directory in extra_dirs:
+        files.extend(sorted(glob.glob(os.path.join(directory, "*.conf"))))
+    return files
+
+
+def parse_chrony_conf_excluded_ips(conf_path=None):
+    """IPs from server lines in chrony config (including commented-out lines)."""
+    excluded_ips = set()
+    hostnames = set()
+    for path in chrony_conf_files(conf_path):
+        try:
+            with open(path, "r") as f:
+                for line in f:
+                    m = SERVER_RE.match(line)
+                    if not m:
+                        continue
+                    host = m.group(1).split("#")[0].strip()
+                    if IPV4_RE.match(host):
+                        excluded_ips.add(host)
+                    else:
+                        hostnames.add(host)
+        except OSError:
+            continue
+    for host in hostnames:
+        try:
+            addrs = socket.getaddrinfo(host, "123", family=socket.AF_INET)
+            for addr in addrs:
+                excluded_ips.add(addr[4][0])
+        except OSError:
+            pass
+    return excluded_ips
+
+
 def parse_chrony_sourcestats(text):
     """Parse `chronyc -n sourcestats` into {name_or_ip: {offset, std_dev, ...}}."""
     stats = {}
@@ -253,12 +316,17 @@ def print_shutdown_chrony_report(best_results):
     else:
         print("\n   (No chrony sources overlap with scanner results)")
 
-    unused = [(ip, d) for ip, d in sorted_measured(best_results) if ip not in chrony_ips]
-    print("\n💡 Top 4 scanner RTTs not in chrony sources:")
+    conf_excluded = parse_chrony_conf_excluded_ips()
+    excluded_ips = chrony_ips | conf_excluded
+    unused = [(ip, d) for ip, d in sorted_measured(best_results) if ip not in excluded_ips]
+    conf_note = ""
+    if conf_excluded:
+        conf_note = f" ({len(conf_excluded)} from chrony.conf, incl. commented)"
+    print(f"\n💡 Top 8 scanner RTTs not used by chrony{conf_note}:")
     if not unused:
-        print("   (none — all top scanner hits are already chrony sources)")
+        print("   (none — remaining scanner hits are active or listed in chrony.conf)")
         return
-    for rank, (ip, data) in enumerate(unused[:4], 1):
+    for rank, (ip, data) in enumerate(unused[:8], 1):
         hops_display = str(data["hops"]) if data["hops"] is not None else "N/A"
         method = data.get("rtt_method", "ping")
         print(
