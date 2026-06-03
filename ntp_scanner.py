@@ -52,6 +52,16 @@ def save_results(best_results, filename=DATA_FILE):
 POOL_HOST_RE = re.compile(r"^(?:(\d+)\.)?([a-z0-9-]+)\.pool\.ntp\.org\.?$", re.IGNORECASE)
 
 
+def normalize_pool_name(name):
+    """Accept zone shorthand (north-america) or full pool.ntp.org hostname."""
+    name = name.strip().rstrip(".")
+    if POOL_HOST_RE.match(name):
+        return name
+    if "." not in name:
+        return f"{name}.pool.ntp.org"
+    return name
+
+
 def pool_hostnames(hostname, expand_pool=True):
     """
     NTP pool DNS returns ~4 A records per name. Expand zone.pool.ntp.org into
@@ -355,7 +365,15 @@ def print_shutdown_chrony_report(best_results):
 
 def main():
     parser = argparse.ArgumentParser(description="NTP closest server finder – persistent data")
-    parser.add_argument("--hostname", default="us.pool.ntp.org", help="NTP pool hostname")
+    parser.add_argument(
+        "--pool",
+        "--hostname",
+        dest="pool",
+        default="us",
+        metavar="ZONE",
+        help="NTP pool zone (us, north-america, europe, …) or full hostname "
+        "(default: us → us.pool.ntp.org)",
+    )
     parser.add_argument(
         "--resolve-tries",
         type=int,
@@ -365,7 +383,7 @@ def main():
     parser.add_argument(
         "--no-pool-expand",
         action="store_true",
-        help="Only resolve --hostname (no 0–3.pool subdomain expansion)",
+        help="Only resolve --pool (no 0–3.pool subdomain expansion)",
     )
     parser.add_argument("--sleep", type=int, default=15, help="Sleep between cycles (seconds)")
     parser.add_argument("--pings", type=int, default=3, help="Pings per IP")
@@ -383,8 +401,9 @@ def main():
         print("🗑️  Reset: previous saved data cleared.")
     best_results = load_results()
 
-    pool_hosts = pool_hostnames(args.hostname, expand_pool=not args.no_pool_expand)
-    print(f"🚀 NTP Scanner started for {args.hostname}")
+    pool_name = normalize_pool_name(args.pool)
+    pool_hosts = pool_hostnames(pool_name, expand_pool=not args.no_pool_expand)
+    print(f"🚀 NTP Scanner started for {pool_name}")
     print(
         f"   Resolve: {args.resolve_tries} lookups across {len(pool_hosts)} name(s) | "
         f"Pings: {args.pings} | Persistent file: {DATA_FILE}"
@@ -400,7 +419,7 @@ def main():
             print(f"─── Iteration {iteration} ───")
 
             ips = get_ntp_ips(
-                args.hostname,
+                pool_name,
                 tries=args.resolve_tries,
                 expand_pool=not args.no_pool_expand,
             )
