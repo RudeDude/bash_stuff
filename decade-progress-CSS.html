@@ -19,17 +19,84 @@ Dynamic width CSS version by Grok on 2026-10-16.<BR>
 </div>
 
 <script>
+// Decade boundaries are local midnights in the viewer's time zone, re-detected
+// on every tick. Epoch subtraction then includes that zone's daylight-saving offset.
+function localTimeZone() {
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (!timeZone) {
+        throw new Error("Could not detect the local time zone");
+    }
+    return timeZone;
+}
+
+function zonedParts(utcMs, timeZone) {
+    const base = {
+        timeZone: timeZone,
+        hourCycle: "h23",
+        calendar: "gregory",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+    };
+    let fmt;
+    try {
+        fmt = new Intl.DateTimeFormat("en-US", Object.assign({ fractionalSecondDigits: 3 }, base));
+    } catch (e) {
+        fmt = new Intl.DateTimeFormat("en-US", base);
+    }
+    const part = {};
+    fmt.formatToParts(new Date(utcMs)).forEach(function (p) {
+        if (p.type !== "literal") part[p.type] = p.value;
+    });
+    let year = Number(part.year);
+    let month = Number(part.month);
+    let day = Number(part.day);
+    let hour = Number(part.hour);
+    // Some engines format midnight as 24:00:00 on the previous day.
+    if (hour === 24) {
+        hour = 0;
+        const next = new Date(Date.UTC(year, month - 1, day + 1));
+        year = next.getUTCFullYear();
+        month = next.getUTCMonth() + 1;
+        day = next.getUTCDate();
+    }
+    return {
+        year: year,
+        month: month,
+        day: day,
+        hour: hour,
+        minute: Number(part.minute),
+        second: Number(part.second),
+        ms: Number(part.fractionalSecond || 0)
+    };
+}
+
+function zoneOffsetMs(utcMs, timeZone) {
+    const p = zonedParts(utcMs, timeZone);
+    return Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second, p.ms) - utcMs;
+}
+
+// UTC epoch ms of a civil time in timeZone. The second pass settles DST.
+function zonedEpochMs(year, month, day, hour, minute, second, ms, timeZone) {
+    const guess = Date.UTC(year, month - 1, day, hour, minute, second, ms);
+    const first = guess - zoneOffsetMs(guess, timeZone);
+    return guess - zoneOffsetMs(first, timeZone);
+}
+
 function updateDecadeProgress() {
-    const now = new Date();
-    const year = now.getFullYear();
+    const timeZone = localTimeZone();
+    const nowMs = Date.now();
+    const year = zonedParts(nowMs, timeZone).year;
     const decadeStartYear = Math.floor(year / 10) * 10;
     const decadeEndYear = decadeStartYear + 10;
     const decade = decadeStartYear + "s";
 
-    const start = new Date(decadeStartYear, 0, 1);
-    const end   = new Date(decadeEndYear, 0, 1);
-
-    const progress = (now - start) / (end - start);
+    const start = zonedEpochMs(decadeStartYear, 1, 1, 0, 0, 0, 0, timeZone);
+    const end = zonedEpochMs(decadeEndYear, 1, 1, 0, 0, 0, 0, timeZone);
+    const progress = (nowMs - start) / (end - start);
     const percentage = (progress * 100).toFixed(15);
 
     document.getElementById('decade-label').textContent = decade;
