@@ -15,7 +15,7 @@ Dynamic width CSS version by Grok on 2026-10-16.<BR>
     <div id="progress-fill" style="height: 100%; background: #333; width: 0%; transition: width 0.1s linear;"></div>
   </div>
   
-  <div id="percentage" style="font-size: 1.35em; font-weight: bold;"></div>
+  <div id="decade-percentage" style="font-size: 1.35em; font-weight: bold;"></div>
 </div>
 
 <script>
@@ -101,7 +101,7 @@ function updateDecadeProgress() {
 
     document.getElementById('decade-label').textContent = decade;
     document.getElementById('progress-fill').style.width = (progress * 100) + '%';
-    document.getElementById('percentage').textContent = percentage + " %";
+    document.getElementById('decade-percentage').textContent = percentage + " %";
 }
 
 updateDecadeProgress();

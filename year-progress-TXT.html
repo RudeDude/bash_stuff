@@ -10,7 +10,7 @@ HTML / basic JavaScript version translated by Grok on 2026-04-20.<BR>
 <div id="year-progress" style="font-family: monospace; text-align: center; padding: 10px;">
   <div id="year-label" style="font-size: 1.4em; margin-bottom: 6px;"></div>
   <div id="progress-bar" style="font-size: 1.2em; letter-spacing: 2px; margin: 8px 0; white-space: pre;"></div>
-  <div id="percentage" style="font-size: 1.35em; font-weight: bold;"></div>
+  <div id="year-percentage" style="font-size: 1.35em; font-weight: bold;"></div>
 </div>
 
 <script>
@@ -99,7 +99,7 @@ function updateYearProgress() {
 
     document.getElementById('year-label').textContent = year;
     document.getElementById('progress-bar').textContent = bar;
-    document.getElementById('percentage').textContent = percentage + " %";
+    document.getElementById('year-percentage').textContent = percentage + " %";
 }
 
 // Initial call + update 10 times per second (every 100ms)
