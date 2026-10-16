@@ -1,5 +1,5 @@
 <HTML><HEAD>
-<TITLE>Decade progress bar -- 2020s</TITLE>
+<TITLE>Decade progress bar</TITLE>
 </HEAD>
 <BODY>
 
@@ -21,10 +21,13 @@ Dynamic width CSS version by Grok on 2026-10-16.<BR>
 <script>
 function updateDecadeProgress() {
     const now = new Date();
-    const decade = "2020s";
+    const year = now.getFullYear();
+    const decadeStartYear = Math.floor(year / 10) * 10;
+    const decadeEndYear = decadeStartYear + 10;
+    const decade = decadeStartYear + "s";
 
-    const start = new Date(2020, 0, 1);
-    const end   = new Date(2030, 0, 1);
+    const start = new Date(decadeStartYear, 0, 1);
+    const end   = new Date(decadeEndYear, 0, 1);
 
     const progress = (now - start) / (end - start);
     const percentage = (progress * 100).toFixed(15);
@@ -37,5 +40,4 @@ function updateDecadeProgress() {
 updateDecadeProgress();
 setInterval(updateDecadeProgress, 100);
 </script>
-
 </BODY>
