@@ -1,0 +1,41 @@
+<HTML><HEAD>
+<TITLE>Year progress bar</TITLE>
+</HEAD>
+<BODY>
+
+Written by Don J. Rude on 2025-12-30 (bash version).<BR>
+HTML / basic JavaScript version translated by Grok on 2026-04-20.<BR>
+Dynamic width CSS version by Grok on 2026-10-16.<BR>
+<P>
+
+<div id="year-progress" style="font-family: monospace; text-align: center; padding: 10px; width: 100%; box-sizing: border-box;">
+  <div id="year-label" style="font-size: 1.4em; margin-bottom: 6px;"></div>
+  
+  <div id="progress-container" style="width: 100%; height: 22px; background: #e0e0e0; border: 1px solid #999; border-radius: 3px; margin: 8px 0; overflow: hidden;">
+    <div id="progress-fill" style="height: 100%; background: #333; width: 0%; transition: width 0.1s linear;"></div>
+  </div>
+  
+  <div id="percentage" style="font-size: 1.35em; font-weight: bold;"></div>
+</div>
+
+<script>
+function updateYearProgress() {
+    const now = new Date();
+    const year = "2020's";
+
+    const start = new Date(2020, 0, 1);
+    const end   = new Date(2030, 0, 1);
+
+    const progress = (now - start) / (end - start);
+    const percentage = (progress * 100).toFixed(15);
+
+    document.getElementById('year-label').textContent = year;
+    document.getElementById('progress-fill').style.width = (progress * 100) + '%';
+    document.getElementById('percentage').textContent = percentage + " %";
+}
+
+updateYearProgress();
+setInterval(updateYearProgress, 100);
+</script>
+
+</BODY>
