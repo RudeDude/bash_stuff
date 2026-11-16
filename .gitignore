@@ -1,3 +1,5 @@
+__pycache__/
+my-session.txt
 .idea/
 *.iml
 ntp_best_servers.json
