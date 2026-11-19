@@ -9,21 +9,22 @@
 
 ### Anyone who attempts to generate random numbers by deterministic means is, of course, living in a state of sin.
 ###   --John von Neumann
-### $RANDOM is an internal Bash function (not a constant) that returns a pseudorandom integer in the range 0 - 32767. It should not be used to generate an encryption key.
-
-### Uses process ID as random seed
-RANDOM=$$
-### See `man urandom` for Linux device info
-### Uses "fast" pseudorandom device
-#RANDOM=$(dd if=/dev/random bs=1 count=1 2>/dev/null | od -N 1 |head -n 1 | awk '{ print $2 }'| sed s/^0*//) # Fancy seed
-### Uses "real" random device, possibly a blocking call
-# RANDOM=$(dd if=/dev/urandom bs=1 count=1 2>/dev/null | od -N 1 |head -n 1 | awk '{ print $2 }'| sed s/^0*//) # Fancy seed
 
 rolldie()
 {
-   local result=$1 sides=$2
-   rolled=$(( ( $RANDOM % $sides ) + 1 ))
-   eval $result=$rolled
+  ### $RANDOM is an internal Bash function (not a constant) that returns a pseudorandom integer in the range 0 - 32767. It should not be used to generate an encryption key.
+  R=$(( $RANDOM + $RANDOM ))
+  ### Uses process ID as random (SEED ONLY!)
+  #R=$$
+  ### See `man urandom` for Linux device info
+  ### Uses "fast" pseudorandom device (0-65535)
+#  R=$(dd if=/dev/random bs=2 count=1 2>/dev/null | od -N 2 -t u2 |head -n 1 | awk '{ print $2 }'| sed s/^0\+/0/)
+  ### Uses "real" random device, possibly a blocking call (0-65535)
+#  R=$(dd if=/dev/urandom bs=2 count=1 2>/dev/null | od -N 2 -t u2 |head -n 1 | awk '{ print $2 }'| sed s/^0\+/0/)
+
+  local result=$1 sides=$2
+  rolled=$(( ( $R % $sides ) + 1 ))
+  eval $result=$rolled
 }
 
 
