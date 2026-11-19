@@ -10,16 +10,26 @@
 ### Anyone who attempts to generate random numbers by deterministic means is, of course, living in a state of sin.
 ###   --John von Neumann
 
+# https://blogs.oracle.com/linux/rngd1
+#  July 19, 2021 -- John Haxby
+#  On modern Linux systems, the in-kernel random number generator in /dev/random is considered cryptographically
+#  secure and, crucially, no longer blocks. The previously non-blocking random source /dev/urandom is also updated
+#  to use the same CSPRNG (Cryptographically Secure PseudoRandom Number Generator).
+# https://blogs.oracle.com/linux/entropyavail-256-is-good-enough-for-everyone
+#  January 21, 2025
+#  There’s no meaningful difference between /dev/random and /dev/urandom.
+#  You can keep running rngd if it makes you feel good, but it’s no longer needed at all.
+
 rolldie()
 {
   ### $RANDOM is an internal Bash function (not a constant) that returns a pseudorandom integer in the range 0 - 32767. It should not be used to generate an encryption key.
-  R=$(( $RANDOM + $RANDOM ))
+#  R=$(( $RANDOM + $RANDOM ))
   ### Uses process ID as random (SEED ONLY!)
   #R=$$
   ### See `man urandom` for Linux device info
-  ### Uses "fast" pseudorandom device (0-65535)
-#  R=$(dd if=/dev/random bs=2 count=1 2>/dev/null | od -N 2 -t u2 |head -n 1 | awk '{ print $2 }'| sed s/^0\+/0/)
-  ### Uses "real" random device, possibly a blocking call (0-65535)
+  ### Uses random device (0-65535)
+  R=$(dd if=/dev/random bs=2 count=1 2>/dev/null | od -N 2 -t u2 |head -n 1 | awk '{ print $2 }'| sed s/^0\+/0/)
+  ### Uses random device (0-65535)
 #  R=$(dd if=/dev/urandom bs=2 count=1 2>/dev/null | od -N 2 -t u2 |head -n 1 | awk '{ print $2 }'| sed s/^0\+/0/)
 
   local result=$1 sides=$2
